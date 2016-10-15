@@ -44,6 +44,16 @@ description = """\
 
 [[configItems]]
 interface = "env"
+key = "assetsBaseUrl"
+cliFlag = "assets-base-url"
+envVar = "SQLPAD_ASSETS_BASE_URL"
+default = ""
+description = """\
+    Similar to --base-url but for assets
+"""
+
+[[configItems]]
+interface = "env"
 key = "passphrase"
 cliFlag = "passphrase"
 envVar = "SQLPAD_PASSPHRASE"
