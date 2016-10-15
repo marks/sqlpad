@@ -12,6 +12,7 @@ var detectPort = require('detect-port')
 ============================================================================= */
 const config = require('./lib/config.js')
 const BASE_URL = config.get('baseUrl')
+const ASSETS_BASE_URL = config.get('assetsBaseUrl')
 const IP = config.get('ip')
 const PORT = config.get('port')
 const GOOGLE_CLIENT_ID = config.get('googleClientId')
@@ -68,6 +69,7 @@ app.use(function (req, res, next) {
   res.locals.user = req.user
   res.locals.isAuthenticated = req.isAuthenticated()
   res.locals.baseUrl = BASE_URL
+  res.locals.assetsBaseUrl = ASSETS_BASE_URL
   next()
 })
 
