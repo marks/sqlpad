@@ -1,5 +1,46 @@
 # Changelog
 
+Install latest beta with `npm i -g sqlpad@beta`  
+Rollback to latest stable with `npm i -g sqlpad@2.1.3`  
+
+## 2.2.0-beta2
+### March 19, 2017
+- fixed version displayed in about modal
+
+## 2.2.0-beta1
+### March 18, 2017
+- fixed query tag weirdness from previous v1 weirdness
+- leading 0s preserved in query results and treated as strings instead of numbers
+- support for postgres ssl certs (thanks johicks and nikicat)
+- fixed crate v1 schema support (thanks mikethebeer)
+- naive autocomplete!
+- refactored connection admin screen
+- changed build system to fork create-react-app
+
+## 2.1.3
+### January 28, 2017
+- Ensure strict db startup order (vweevers)
+- Improve query editor performance/reduce SQL editor lag
+
+## 2.1.2
+### December 9, 2016
+- Fix chart only view not displaying charts
+- Fix query editor search
+- Update dependencies
+
+## 2.1.1
+### November 29, 2016
+- Fix: disabling of links on query details modal (thanks vweevers!)
+- Fix: Vis tab loading indicator behaves same as query tab, hiding error on rerun (thanks vweevers!)
+- Fix: Charts rendered lazily. Query result grid loads faster, large query results won't lock browser until you try to chart. (thanks vweevers!)
+- Fix: Hide local auth form if DISABLE_USERPASS_AUTH=true
+
+## 2.1.0
+### November 20, 2016
+- run https via sqlpad directly (see additional setting) (thanks jameswinegar!) 
+- Support non English characters when downloading files (thanks askluyao!)
+- render booleans/null timestamps properly
+
 ## 2.0.0
 ### October 12, 2016
 - (See beta 1 - 3 release notes)

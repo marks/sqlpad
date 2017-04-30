@@ -23,6 +23,14 @@ description = "Port for SqlPad to listen on."
 
 [[configItems]]
 interface = "env"
+key = "httpsPort"
+cliFlag = "https-port"
+envVar = "SQLPAD_HTTPS_PORT"
+default = 443
+description = "Port for SqlPad to listen on."
+
+[[configItems]]
+interface = "env"
 key = "dbPath"
 cliFlag = ["db", "dbPath", "dir"]
 envVar = "SQLPAD_DB_PATH"
@@ -50,6 +58,31 @@ envVar = "SQLPAD_PASSPHRASE"
 sensitive = true
 default = "At least the sensitive bits won't be plain text?"
 description = "A string of text used to encrypt sensitive values when stored on disk."
+
+[[configItems]]
+interface = "env"
+key = "certPassphrase"
+cliFlag = "cert-passphrase"
+envVar = "CERT_PASSPHRASE"
+sensitive = true
+default = "No cert"
+description = "Passphrase for your SSL certification file"
+
+[[configItems]]
+interface = "env"
+key = "keyPath"
+cliFlag = ["key", "key-path", "key-dir"]
+envVar = "KEY_PATH"
+default = ""
+description = "Absolute path to where SSL certificate key is stored"
+
+[[configItems]]
+interface = "env"
+key = "certPath"
+cliFlag = ["cert", "cert-path", "cert-dir"]
+envVar = "CERT_PATH"
+default = ""
+description = "Absolute path to where SSL certificate is stored"
 
 [[configItems]]
 interface = "env"
@@ -164,6 +197,15 @@ envVar = "SQLPAD_SMTP_HOST"
 cliFlag = "smtp-host"
 label = "SMTP Host"
 description = "Host address for SMTP. Required in order to send invitation emails."
+default = ""
+
+[[configItems]]
+interface = "ui"
+key = "smtpPort"
+envVar = "SQLPAD_SMTP_PORT"
+cliFlag = "smtp-port"
+label = "SMTP Port"
+description = "Port for SMTP. Required in order to send invitation emails."
 default = ""
 
 [[configItems]]

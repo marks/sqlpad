@@ -1,16 +1,15 @@
 var React = require('react')
-var _ = require('_')
+var _ = window._
 var chartDefinitions = require('./ChartDefinitions.js')
 var SpinKitCube = require('./SpinKitCube.js')
-var tauCharts = require('tauCharts')
+var tauCharts = window.tauCharts
 var Alert = require('react-s-alert').default
 
 var SqlpadTauChart = React.createClass({
   componentDidUpdate: function (prevProps) {
-    var prevResultId = (prevProps.queryResult ? prevProps.queryResult.id : null)
-    var currentResultId = (this.props.queryResult ? this.props.queryResult.id : null)
-    if (prevResultId !== currentResultId) {
-      console.log('rendering because queryResults changed')
+    if (this.props.isRunning || this.props.queryError) {
+      this.destroyChart()
+    } else if (this.props.renderChart && !this.chart) {
       this.renderChart()
     }
   },
@@ -23,6 +22,12 @@ var SqlpadTauChart = React.createClass({
     left: 0,
     right: 0
   },
+  destroyChart () {
+    if (this.chart) {
+      this.chart.destroy()
+      this.chart = null
+    }
+  },
   renderChart: function (rerender) {
     // This is invoked during following:
     //  - Vis tab enter
@@ -34,8 +39,8 @@ var SqlpadTauChart = React.createClass({
     var selectedFields = this.props.query.chartConfiguration.fields
     var chartDefinition = _.findWhere(chartDefinitions, {chartType: chartType})
 
-    if (this.chart && (!dataRows.length || !chartDefinition)) {
-      this.chart.destroy()
+    if (rerender || !dataRows.length || !chartDefinition) {
+      this.destroyChart()
     }
 
     // If there's no data just exit the chart render
@@ -75,14 +80,18 @@ var SqlpadTauChart = React.createClass({
 
     // loop through data rows and convert types as needed
     dataRows = dataRows.map((row) => {
-      for (var col in row) {
+      var newRow = {}
+      Object.keys(row).forEach(col => {
         var datatype = this.props.queryResult.meta[col].datatype
         if (datatype === 'date') {
-          row[col] = new Date(row[col])
+          newRow[col] = new Date(row[col])
         } else if (datatype === 'number') {
-          row[col] = Number(row[col])
+          newRow[col] = Number(row[col])
+        } else {
+          newRow[col] = row[col]
         }
-      }
+      })
+
       // HACK -
       // Facets need to be a dimension, not a measure.
       // tauCharts auto detects numbers to be measures
@@ -92,11 +101,11 @@ var SqlpadTauChart = React.createClass({
       forceDimensionFields.forEach(function (fieldDefinition) {
         var col = fieldDefinition.val
         var colDatatype = (meta[col] ? meta[col].datatype : null)
-        if (col && colDatatype === 'number' && row[col]) {
-          row[col] = row[col].toString()
+        if (col && colDatatype === 'number' && newRow[col]) {
+          newRow[col] = newRow[col].toString()
         }
       })
-      return row
+      return newRow
     })
 
     var definitionFieldsById = _.indexBy(definitionFields, 'fieldId')
@@ -202,10 +211,6 @@ var SqlpadTauChart = React.createClass({
     if (!this.chart) {
       this.chart = new tauCharts.Chart(chartConfig)
       this.chart.renderTo('#chart')
-    } else if (this.chart && rerender) {
-      this.chart.destroy()
-      this.chart = new tauCharts.Chart(chartConfig)
-      this.chart.renderTo('#chart')
     } else {
       this.chart.setData(dataRows)
     }
@@ -214,7 +219,7 @@ var SqlpadTauChart = React.createClass({
     this.chart.setData(chartData)
   },
   componentWillUnmount () {
-    if (this.chart) this.chart.destroy()
+    this.destroyChart()
   },
   render: function () {
     var runResultNotification = () => {
@@ -224,22 +229,19 @@ var SqlpadTauChart = React.createClass({
             <SpinKitCube />
           </div>
         )
-      }
-      return null
-    }
-    var runResultErrorNotification = () => {
-      if (this.props.queryError) {
+      } else if (this.props.queryError) {
         return (
           <div className='run-result-notification label-danger'>
             {this.props.queryError}
           </div>
         )
+      } else {
+        return null
       }
     }
     return (
       <div id='chart' style={this.chartStyle}>
         {runResultNotification()}
-        {runResultErrorNotification()}
       </div>
     )
   }

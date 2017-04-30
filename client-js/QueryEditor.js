@@ -13,6 +13,7 @@ var Alert = require('react-s-alert').default
 import AceEditor from 'react-ace'
 import 'brace/mode/sql'
 import 'brace/theme/sqlserver'
+import 'brace/ext/searchbox'
 
 var Row = require('react-bootstrap/lib/Row')
 var Col = require('react-bootstrap/lib/Col')
@@ -64,7 +65,7 @@ var QueryDetailsModal = React.createClass({
   },
   render: function () {
     var modalNavLink = (href, text) => {
-      var saved = (this.props.query._id != null)
+      var saved = !!this.props.query._id
       if (saved) {
         return (
           <li role='presentation'>
@@ -138,10 +139,16 @@ var QueryEditor = React.createClass({
     fetchJson('GET', this.props.config.baseUrl + '/api/connections/')
       .then((json) => {
         if (json.error) Alert.error(json.error)
+        const connections = json.connections
+        const query = this.state.query
+        // if only 1 connection auto-select it
+        if (connections.length === 1 && this.state.query) {
+          query.connectionId = connections[0]._id
+        }
         this.setState({
-          connections: json.connections
+          connections: connections,
+          query: query
         })
-        this.autoPickConnection()
       })
       .catch((ex) => {
         console.error(ex.toString())
@@ -160,15 +167,6 @@ var QueryEditor = React.createClass({
         console.error(ex.toString())
         Alert.error('Something is broken')
       })
-  },
-  autoPickConnection: function () {
-    if (this.state.connections.length === 1 && this.state.query) {
-      var stateQuery = this.state.query
-      stateQuery.connectionId = this.state.connections[0]._id
-      this.setState({
-        query: stateQuery
-      })
-    }
   },
   getInitialState: function () {
     return {
@@ -341,6 +339,19 @@ var QueryEditor = React.createClass({
 
     if (this.editor) {
       this.editor.focus()
+
+      // augment the built-in behavior of liveAutocomplete
+      // built-in behavior only starts autocomplete when at least 1 character has been typed
+      // In ace the . resets the prefix token and clears the completer
+      // In order to get completions for 'sometable.' we need to fire the completer manually
+      const editor = this.editor
+      editor.commands.on('afterExec', function (e) {
+        if (e.command.name === 'insertstring' && /^[\w.]$/.test(e.args)) {
+          if (e.args === '.') {
+            editor.execCommand('startAutocomplete')
+          }
+        }
+      })
       if (this.props.config.editorWordWrap) this.editor.session.setUseWrapMode(true)
     }
 
@@ -380,25 +391,19 @@ var QueryEditor = React.createClass({
     })
   },
   sqlpadTauChart: undefined,
+  hasRows: function () {
+    var queryResult = this.state.queryResult
+    return !!(queryResult && queryResult.rows && queryResult.rows.length)
+  },
+  isChartable: function () {
+    var pending = this.state.isRunning || this.state.queryError
+    return !pending && this.state.activeTabKey === 'vis' && this.hasRows()
+  },
   onVisualizeClick: function (e) {
     this.sqlpadTauChart.renderChart(true)
   },
   onTabSelect: function (tabkey) {
     this.setState({activeTabKey: tabkey})
-    var renderChartIfVisible = () => {
-      var chartEl = document.getElementById('chart')
-      if (chartEl.clientHeight > 0) {
-        try {
-          this.sqlpadTauChart.renderChart()
-        } catch (e) {
-          console.log('tauchart rendering failed')
-          console.log(e)
-        }
-      } else {
-        setTimeout(renderChartIfVisible, 20)
-      }
-    }
-    if (tabkey === 'vis') renderChartIfVisible()
   },
   onSaveImageClick: function (e) {
     if (this.sqlpadTauChart && this.sqlpadTauChart.chart) {
@@ -486,7 +491,9 @@ var QueryEditor = React.createClass({
                           highlightActiveLine={false}
                           onChange={this.onQueryTextChange}
                           value={this.state.query.queryText}
-                          editorProps={{$blockScrolling: true}}
+                          editorProps={{$blockScrolling: Infinity}}
+                          enableBasicAutocompletion
+                          enableLiveAutocompletion
                           ref={(ref) => {
                             this.editor = (ref ? ref.editor : null)
                           }} />
@@ -529,7 +536,13 @@ var QueryEditor = React.createClass({
                           queryResult={this.state.queryResult} />
                       </div>
                       <div className='sidebar-footer'>
-                        <Button onClick={this.onVisualizeClick} className={'btn-block'} bsSize={'sm'}>Visualize</Button>
+                        <Button
+                          onClick={this.onVisualizeClick}
+                          disabled={!this.isChartable()}
+                          className={'btn-block'}
+                          bsSize={'sm'}>
+                          Visualize
+                        </Button>
                         <Button onClick={this.onSaveImageClick} className={'btn-block'} bsSize={'sm'}>
                           <Glyphicon glyph='save' />{' '}
                           Save Chart Image
@@ -543,6 +556,7 @@ var QueryEditor = React.createClass({
                         queryResult={this.state.queryResult}
                         queryError={this.state.queryError}
                         isRunning={this.state.isRunning}
+                        renderChart={this.isChartable()}
                         ref={(ref) => {
                           this.sqlpadTauChart = ref
                         }} />

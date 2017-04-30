@@ -2,16 +2,38 @@ var React = require('react')
 var SpinKitCube = require('./SpinKitCube.js')
 var moment = require('moment')
 import {Table, Column, Cell} from 'fixed-data-table' // react's fixed data table
-var _ = require('_')
+var _ = window._
 
-var QueryResultDataTable = React.createClass({
-  getInitialState: function () {
-    return {
+var renderValue = (input, fieldMeta) => {
+  if (input === null || input === undefined) {
+    return <em>null</em>
+  } else if (input === true || input === false) {
+    return input.toString()
+  } else if (fieldMeta.datatype === 'date') {
+    return moment(input).format('MM/DD/YYYY HH:mm:ss')
+  } else if (_.isObject(input)) {
+    return JSON.stringify(input, null, 2)
+  } else {
+    return input
+  }
+}
+
+// NOTE: PureComponent's shallow compare works for this component
+// because the isRunning prop will toggle with each query execution
+// It would otherwise not rerender on change of prop.queryResult alone
+class QueryResultDataTable extends React.PureComponent {
+
+  constructor (props) {
+    super(props)
+    this.state = {
       gridWidth: 0,
       gridHeight: 0
     }
-  },
-  handleResize: function (e) {
+    // This binding is necessary to make `this` work in the callback
+    this.handleResize = this.handleResize.bind(this)
+  }
+
+  handleResize (e) {
     var resultGrid = document.getElementById('result-grid')
     if (resultGrid) {
       this.setState({
@@ -19,15 +41,18 @@ var QueryResultDataTable = React.createClass({
         gridWidth: resultGrid.clientWidth
       })
     }
-  },
-  componentDidMount: function () {
+  }
+
+  componentDidMount () {
     window.addEventListener('resize', this.handleResize)
     this.handleResize()
-  },
-  componentWillUnmount: function () {
+  }
+
+  componentWillUnmount () {
     window.removeEventListener('resize', this.handleResize)
-  },
-  render: function () {
+  }
+
+  render () {
     if (this.props.isRunning) {
       return (
         <div id='result-grid' className='run-result-notification'>
@@ -51,16 +76,6 @@ var QueryResultDataTable = React.createClass({
         if (columnWidth < 200) columnWidth = 200
         else if (columnWidth > 350) columnWidth = 350
         var cellWidth = columnWidth - 10
-
-        var renderValue = (input) => {
-          if (fieldMeta.datatype === 'date') {
-            return moment(input).format('MM/DD/YYYY HH:mm:ss')
-          } else if (_.isObject(input)) {
-            return JSON.stringify(input, null, 2)
-          } else {
-            return input
-          }
-        }
 
         return (
           <Column
@@ -93,7 +108,7 @@ var QueryResultDataTable = React.createClass({
                 <Cell>
                   {numberBar}
                   <div style={{textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden', width: cellWidth, position: 'absolute'}}>
-                    {renderValue(value)}
+                    {renderValue(value, fieldMeta)}
                   </div>
                 </Cell>
               )
@@ -118,6 +133,6 @@ var QueryResultDataTable = React.createClass({
       return <div id='result-grid' />
     }
   }
-})
+}
 
 module.exports = QueryResultDataTable

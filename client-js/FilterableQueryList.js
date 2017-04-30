@@ -1,6 +1,6 @@
 var React = require('react')
 var moment = require('moment')
-var _ = require('_')
+var _ = window._
 var fetchJson = require('./utilities/fetch-json.js')
 var Alert = require('react-s-alert').default
 import AceEditor from 'react-ace'
@@ -154,7 +154,7 @@ var FilterableQueryList = React.createClass({
     }
 
     return (
-      <div>
+      <div className='QueryListContainer'>
         <QueryListSidebar
           currentUser={this.props.currentUser}
           connections={this.state.connections}
