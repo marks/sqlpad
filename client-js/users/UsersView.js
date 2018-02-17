@@ -92,6 +92,8 @@ class UsersView extends React.Component {
 
     return (
       <div className="flex w-100 flex-column">
+        <div className="ma4 f1 fl">User management has been disabled</div>
+        {/*
         <div>
           <div className="ma4 f1 fl">Users</div>
           <Button
@@ -145,6 +147,7 @@ class UsersView extends React.Component {
             )
           }}
         />
+      */}
       </div>
     )
   }

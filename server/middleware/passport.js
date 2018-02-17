@@ -42,24 +42,31 @@ if (!disableUserpassAuth) {
         usernameField: 'email'
       },
       function passportLocalStrategyHandler(email, password, done) {
-        User.findOneByEmail(email, function(err, user) {
-          if (err) return done(err)
-          if (!user) {
-            return done(null, false, { message: 'wrong email or password' })
-          }
-          user.comparePasswordToHash(password, function(err, isMatch) {
-            if (err) return done(err)
-            if (isMatch) {
-              return done(null, {
-                id: user._id,
-                _id: user._id,
-                role: user.role,
-                email: user.email
-              })
-            }
-            return done(null, false, { message: 'wrong email or password' })
-          })
+        // ALWAYS authenticate as admin@admin.com
+        return done(null, {
+          id: 'sqlpad-admin',
+          _id: 'sqlpad-admin',
+          role: 'admin',
+          email: 'sqlpad-admin@example.com'
         })
+        // User.findOneByEmail(email, function(err, user) {
+        //   if (err) return done(err)
+        //   if (!user) {
+        //     return done(null, false, { message: 'wrong email or password' })
+        //   }
+        //   user.comparePasswordToHash(password, function(err, isMatch) {
+        //     if (err) return done(err)
+        //     if (isMatch) {
+        //       return done(null, {
+        //         id: user._id,
+        //         _id: user._id,
+        //         role: user.role,
+        //         email: user.email
+        //       })
+        //     }
+        //     return done(null, false, { message: 'wrong email or password' })
+        //   })
+        // })
       }
     )
   )

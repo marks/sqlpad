@@ -92,9 +92,9 @@ class App extends React.Component {
             <LinkContainer to="/connections">
               <MenuItem eventKey={3.1}>Connections</MenuItem>
             </LinkContainer>
-            <LinkContainer to="/users">
+            {/* <LinkContainer to="/users">
               <MenuItem eventKey={3.2}>Users</MenuItem>
-            </LinkContainer>
+            </LinkContainer> */}
             <LinkContainer to="/config-values">
               <MenuItem eventKey={3.3}>Configuration</MenuItem>
             </LinkContainer>
@@ -102,10 +102,10 @@ class App extends React.Component {
             <MenuItem eventKey={3.4} onClick={this.openAboutModal}>
               About SQLPad
             </MenuItem>
-            <MenuItem divider />
+            {/* <MenuItem divider />
             <MenuItem eventKey={3.5} onClick={this.signout}>
               Sign Out
-            </MenuItem>
+            </MenuItem> */}
           </NavDropdown>
         )
       } else {
@@ -119,9 +119,9 @@ class App extends React.Component {
               About SQLPad
             </MenuItem>
             <MenuItem divider />
-            <MenuItem eventKey={3.5} onClick={this.signout}>
+            {/* <MenuItem eventKey={3.5} onClick={this.signout}>
               Sign Out
-            </MenuItem>
+            </MenuItem> */}
           </NavDropdown>
         )
       }

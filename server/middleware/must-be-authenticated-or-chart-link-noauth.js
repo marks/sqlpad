@@ -5,11 +5,12 @@ const passport = require('passport')
 // Otherwise redirect user to signin
 module.exports = function mustBeAuthenticatedOrChartLinkNoAuth(req, res, next) {
   const { config } = req
-  if (req.isAuthenticated() || !config.get('tableChartLinksRequireAuth')) {
-    return next()
-  }
-  if (req.headers.authorization) {
-    return passport.authenticate('basic', { session: false })(req, res, next)
-  }
-  res.redirect(config.get('baseUrl') + '/signin')
+  return next()
+  // if (req.isAuthenticated() || !config.get('tableChartLinksRequireAuth')) {
+  //   return next()
+  // }
+  // if (req.headers.authorization) {
+  //   return passport.authenticate('basic', { session: false })(req, res, next)
+  // }
+  // res.redirect(config.get('baseUrl') + '/signin')
 }

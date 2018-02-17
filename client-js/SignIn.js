@@ -27,7 +27,7 @@ class SignIn extends React.Component {
   signIn = e => {
     e.preventDefault()
     fetchJson('POST', '/api/signin', this.state).then(json => {
-      if (json.error) return Alert.error('Username or password incorrect')
+      // if (json.error) return Alert.error('Username or password incorrect')
       this.setState({ redirect: true })
     })
   }
@@ -47,7 +47,6 @@ class SignIn extends React.Component {
             className="form-control mt2"
             placeholder="Email address"
             onChange={this.onEmailChange}
-            required
           />
           <input
             name="password"
@@ -55,7 +54,6 @@ class SignIn extends React.Component {
             className="form-control mt2"
             placeholder="Password"
             onChange={this.onPasswordChange}
-            required
           />
           <button
             onClick={this.signIn}
@@ -65,14 +63,14 @@ class SignIn extends React.Component {
             Sign in
           </button>
         </form>
-        <div className="tc mt3">
+        {/* <div className="tc mt3">
           <Link to="/signup">Sign Up</Link>
           {smtpConfigured ? (
             <Link className="ml5" to="/forgot-password">
               Forgot Password
             </Link>
           ) : null}
-        </div>
+        </div> */}
       </div>
     )
     const googleForm = (
@@ -93,11 +91,15 @@ class SignIn extends React.Component {
       </div>
     )
     return (
-      <div className="pt5 measure center" style={{ width: '300px' }}>
-        <h1 className="f2 tc">SQLPad</h1>
-        {'local' in passport.strategies ? localForm : null}
-        {'google' in passport.strategies ? googleForm : null}
-      </div>
+      this.signIn,
+      (
+        <Redirect push to="/queries" />
+        // <div className="pt5 measure center" style={{ width: '300px' }}>
+        //   <h1 className="f2 tc">SQLPad</h1>
+        //   {'local' in passport.strategies ? localForm : null}
+        //   {'google' in passport.strategies ? googleForm : null}
+        // </div>
+      )
     )
   }
 }
