@@ -1,88 +1,96 @@
-var React = require('react')
-var fetchJson = require('./utilities/fetch-json.js')
-var Alert = require('react-s-alert').default
-var page = require('page')
+import React from 'react'
+import { Redirect } from 'react-router-dom'
+import fetchJson from './utilities/fetch-json.js'
+import Alert from 'react-s-alert'
 
-var SignUp = React.createClass({
-  getInitialState: function () {
-    return {
-      email: '',
-      password: '',
-      passwordConfirmation: ''
-    }
-  },
-  onEmailChange: function (e) {
-    this.setState({email: e.target.value})
-  },
-  onPasswordChange: function (e) {
-    this.setState({password: e.target.value})
-  },
-  onPasswordConfirmationChange: function (e) {
-    this.setState({passwordConfirmation: e.target.value})
-  },
-  signUp: function (e) {
+class SignUp extends React.Component {
+  state = {
+    email: '',
+    password: '',
+    passwordConfirmation: '',
+    redirect: false
+  }
+
+  componentDidMount() {
+    document.title = 'SQLPad - Sign Up'
+  }
+
+  onEmailChange = e => {
+    this.setState({ email: e.target.value })
+  }
+
+  onPasswordChange = e => {
+    this.setState({ password: e.target.value })
+  }
+
+  onPasswordConfirmationChange = e => {
+    this.setState({ passwordConfirmation: e.target.value })
+  }
+
+  signUp = e => {
     e.preventDefault()
-    fetchJson('POST', this.props.config.baseUrl + '/api/signup', this.state)
-      .then((json) => {
-        if (json.error) return Alert.error(json.error)
-        page('/')
-      })
-      .catch((ex) => {
-        Alert.error('Problem signing up')
-        console.error(ex)
-      })
-  },
-  render: function () {
+    fetchJson('POST', '/api/signup', this.state).then(json => {
+      if (json.error) return Alert.error(json.error)
+      this.setState({ redirect: true })
+    })
+  }
+
+  render() {
+    const { redirect } = this.state
+    if (redirect) {
+      return <Redirect to="/" />
+    }
     const adminRegistrationOpenIntro = () => {
-      if (this.props.adminRegistrationOpen) {
+      if (this.props.adminRegistrationOpen || true) {
         return (
-          <div>
-            <h4>Admin Registration is Open</h4>
+          <div className="mb4">
+            <h2 className="f3 tc">Admin Registration is Open</h2>
             <p>
-              Welcome to SqlPad!
-              Since there are no admins currently in the system,
-              registration is open to anyone. By signing up, you will
-              be granted admin rights, and the system will be locked down.
-              Only people explicitly invited & whitelisted will be able to join.
+              Welcome to SQLPad! Since there are no admins currently in the
+              system, registration is open to anyone. By signing up, you will be
+              granted admin rights, and the system will be locked down. Only
+              people explicitly invited & whitelisted will be able to join.
             </p>
-            <br />
           </div>
         )
       }
     }
     return (
-      <div className='signin' >
-        <form className='form-signin' role='form' onSubmit={this.signUp}>
-          <h2>SqlPad</h2>
+      <div className="pt5 measure center" style={{ width: '300px' }}>
+        <form onSubmit={this.signUp}>
+          <h1 className="f2 tc">SQLPad</h1>
           {adminRegistrationOpenIntro()}
           <input
-            name='email'
-            type='email'
-            className='form-control top-field'
-            placeholder='Email address'
+            name="email"
+            type="email"
+            className="form-control mt3"
+            placeholder="Email address"
             onChange={this.onEmailChange}
-            required />
+            required
+          />
           <input
-            name='password'
-            type='password'
-            className='form-control middle-field'
-            placeholder='Password'
+            name="password"
+            type="password"
+            className="form-control mt3"
+            placeholder="Password"
             onChange={this.onPasswordChange}
-            required />
+            required
+          />
           <input
-            name='passwordConfirmation'
-            type='password'
-            className='form-control bottom-field'
-            placeholder='Confirm Password'
+            name="passwordConfirmation"
+            type="password"
+            className="form-control mt3"
+            placeholder="Confirm Password"
             onChange={this.onPasswordConfirmationChange}
-            required />
-          <br />
-          <button className='btn btn-lg btn-primary btn-block' type='submit'>Sign up</button>
+            required
+          />
+          <button className="btn btn-primary btn-block mt3" type="submit">
+            Sign up
+          </button>
         </form>
-        <Alert stack={{limit: 3}} position='bottom-right' />
       </div>
     )
   }
-})
+}
 
-module.exports = SignUp
+export default SignUp

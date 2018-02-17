@@ -1,14 +1,52 @@
-# this file is for developping purpose only
+# This file is for development purposes
+# It runs databases supported by docker for dev/testing
+# It used to have node stuff in a container, 
+# but the development flow got tedious, slow, and buggy. 
+# If there is a better way to do it Issues/Pull Requests are welcome.
 #
-# HOWTO
-# fist install the node_modules with: docker-compose run --rm web npm -i
-# then run: docker-compose up
-# then you should be able to access the project on http://localhost:3000
-web:
-  image: node:4.5.0
-  ports:
-    - "3000:3000"
-  volumes:
-    - .:/var/www
-  working_dir: /var/www
-  command: npm run start
+# TODO add other supported databases where possible (crate, mssql, etc)
+#
+version: '3'
+services:
+  postgres:
+    image: postgres:9.6-alpine
+    environment:
+      POSTGRES_USER: sqlpad
+      POSTGRES_DB: sqlpad
+    ports: 
+      - "5432:5432"
+  mariadb:
+    image: mariadb:10.3
+    environment:
+      MYSQL_ROOT_PASSWORD: sqlpad
+      MYSQL_DATABASE: sqlpad
+      MYSQL_USER: sqlpad
+      MYSQL_PASSWORD: sqlpad
+    ports:
+      - "3306:3306"
+  # NOTE For testing use
+  # user: sqlpad (can be anything)
+  # catalog: system
+  # schema: metadata
+  # TODO move driver stuff out to separate repo for testing
+  # presto:
+  #   image: johandry/presto:0.167-t.0.3-alpine
+  #   expose: 
+  #     - "8080"
+  #   ports: 
+  #     - "8080:8080"
+  #   environment:
+  #     HTTP_SERVER_PORT: 8080
+  #     PRESTO_MAX_MEMORY: .25
+  #     PRESTO_MAX_MEMORY_PER_NODE: .25
+  #     PRESTO_JVM_HEAP_SIZE: 1
+  #   links:
+  #     - presto-worker
+  # presto-worker:
+  #   image: johandry/presto:0.167-t.0.3-alpine
+  #   environment:
+  #     COORDINATOR: presto
+  #     HTTP_SERVER_PORT: 8080
+  #     PRESTO_MAX_MEMORY: .25
+  #     PRESTO_MAX_MEMORY_PER_NODE: .25
+  #     PRESTO_JVM_HEAP_SIZE: 1

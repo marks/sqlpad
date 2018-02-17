@@ -1,48 +1,54 @@
-var React = require('react')
-var fetchJson = require('./utilities/fetch-json.js')
-var Alert = require('react-s-alert').default
-var page = require('page')
+import React from 'react'
+import { Redirect } from 'react-router-dom'
+import fetchJson from './utilities/fetch-json.js'
+import Alert from 'react-s-alert'
 
-var ForgotPassword = React.createClass({
-  getInitialState: function () {
-    return {
-      email: ''
-    }
-  },
-  onEmailChange: function (e) {
-    this.setState({email: e.target.value})
-  },
-  resetPassword: function (e) {
+class ForgotPassword extends React.Component {
+  state = {
+    email: '',
+    redirect: false
+  }
+
+  componentDidMount() {
+    document.title = 'SQLPad - Forgot Password'
+  }
+
+  onEmailChange = e => {
+    this.setState({ email: e.target.value })
+  }
+
+  resetPassword = e => {
     e.preventDefault()
-    fetchJson('POST', this.props.config.baseUrl + '/api/forgot-password', this.state)
-      .then((json) => {
-        if (json.error) return Alert.error(json.error)
-        page('/password-reset')
-      })
-      .catch((ex) => {
-        Alert.error('Problem resetting password')
-        console.error(ex)
-      })
-  },
-  render: function () {
+    fetchJson('POST', '/api/forgot-password', this.state).then(json => {
+      if (json.error) return Alert.error(json.error)
+      this.setState({ redirect: true })
+    })
+  }
+
+  render() {
+    const { redirect } = this.state
+    if (redirect) {
+      return <Redirect to="/password-reset" />
+    }
     return (
-      <div className='signin' >
-        <form className='form-signin' role='form' onSubmit={this.resetPassword}>
-          <h2>SqlPad</h2>
+      <div className="pt5 measure center" style={{ width: '300px' }}>
+        <form onSubmit={this.resetPassword}>
+          <h1 className="f2 tc">SQLPad</h1>
           <input
-            name='email'
-            type='email'
-            className='form-control top-field'
-            placeholder='Email address'
+            name="email"
+            type="email"
+            className="form-control mt3"
+            placeholder="Email address"
             onChange={this.onEmailChange}
-            required />
-          <br />
-          <button className='btn btn-lg btn-primary btn-block' type='submit'>Reset Password</button>
+            required
+          />
+          <button className="btn btn-primary btn-block mt3" type="submit">
+            Reset Password
+          </button>
         </form>
-        <Alert stack={{limit: 3}} position='bottom-right' />
       </div>
     )
   }
-})
+}
 
-module.exports = ForgotPassword
+export default ForgotPassword

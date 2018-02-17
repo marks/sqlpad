@@ -1,92 +1,101 @@
-var React = require('react')
-var fetchJson = require('./utilities/fetch-json.js')
-var Alert = require('react-s-alert').default
-var page = require('page')
+import React from 'react'
+import { Redirect } from 'react-router-dom'
+import fetchJson from './utilities/fetch-json.js'
+import Alert from 'react-s-alert'
 
-var PasswordReset = React.createClass({
-  getInitialState: function () {
-    return {
-      email: '',
-      password: '',
-      passwordConfirmation: '',
-      notFound: false
-    }
-  },
-  onEmailChange: function (e) {
-    this.setState({email: e.target.value})
-  },
-  onPasswordChange: function (e) {
-    this.setState({password: e.target.value})
-  },
-  onPasswordConfirmationChange: function (e) {
-    this.setState({passwordConfirmation: e.target.value})
-  },
-  resetPassword: function (e) {
+class PasswordReset extends React.Component {
+  state = {
+    email: '',
+    password: '',
+    passwordConfirmation: '',
+    notFound: false,
+    redirect: false
+  }
+
+  onEmailChange = e => {
+    this.setState({ email: e.target.value })
+  }
+
+  onPasswordChange = e => {
+    this.setState({ password: e.target.value })
+  }
+
+  onPasswordConfirmationChange = e => {
+    this.setState({ passwordConfirmation: e.target.value })
+  }
+
+  resetPassword = e => {
     e.preventDefault()
-    fetchJson('POST', this.props.config.baseUrl + '/api/password-reset/' + this.props.passwordResetId, this.state)
-      .then((json) => {
-        if (json.error) return Alert.error(json.error)
-        page('/')
-      })
-      .catch((ex) => {
-        Alert.error('Problem resetting password')
-        console.error(ex)
-      })
-  },
-  componentDidMount: function () {
-    fetchJson('GET', this.props.config.baseUrl + '/api/password-reset/' + this.props.passwordResetId)
-      .then((json) => {
-        if (json.error) return Alert.error(json.error)
-        if (!json.passwordResetId) this.setState({notFound: true})
-      })
-      .catch((ex) => {
-        console.error(ex.toString())
-        Alert.error('Something is broken')
-      })
-  },
-  render: function () {
-    if (this.state.notFound) {
+    fetchJson(
+      'POST',
+      '/api/password-reset/' + this.props.passwordResetId,
+      this.state
+    ).then(json => {
+      if (json.error) return Alert.error(json.error)
+      this.setState({ redirect: true })
+    })
+  }
+
+  componentDidMount() {
+    document.title = 'SQLPad - Password Reset'
+    fetchJson(
+      'GET',
+      '/api/password-reset/' + this.props.passwordResetId
+    ).then(json => {
+      if (json.error) return Alert.error(json.error)
+      if (!json.passwordResetId) this.setState({ notFound: true })
+    })
+  }
+
+  render() {
+    const { notFound, redirect } = this.state
+    if (redirect) {
+      return <Redirect to="/" />
+    }
+    if (notFound) {
       return (
-        <div className='signin' >
-          <form className='form-signin' role='form' onSubmit={this.resetPassword}>
-            <h2>Password Reset<br />Not Found</h2>
+        <div className="pt5 measure center" style={{ width: '300px' }}>
+          <form onSubmit={this.resetPassword}>
+            <h1 className="f2">Password reset not found</h1>
           </form>
-          <Alert stack={{limit: 3}} position='bottom-right' />
         </div>
       )
     }
     return (
-      <div className='signin' >
-        <form className='form-signin' role='form' onSubmit={this.resetPassword}>
-          <h2>SqlPad</h2>
+      <div className="pt5 measure center" style={{ width: '300px' }}>
+        <form onSubmit={this.resetPassword}>
+          <h1 className="f2 tc">SQLPad</h1>
           <input
-            name='email'
-            type='email'
-            className='form-control top-field'
-            placeholder='Email address'
+            name="email"
+            type="email"
+            className="form-control mt3"
+            placeholder="Email address"
             onChange={this.onEmailChange}
-            required />
+            required
+          />
           <input
-            name='password'
-            type='password'
-            className='form-control middle-field'
-            placeholder='Password'
+            name="password"
+            type="password"
+            className="form-control mt3"
+            placeholder="Password"
             onChange={this.onPasswordChange}
-            required />
+            required
+          />
           <input
-            name='passwordConfirmation'
-            type='password'
-            className='form-control bottom-field'
-            placeholder='Confirm Password'
+            name="passwordConfirmation"
+            type="password"
+            className="form-control mt3"
+            placeholder="Confirm Password"
             onChange={this.onPasswordConfirmationChange}
-            required />
-          <br />
-          <button className='btn btn-lg btn-primary btn-block' type='submit'>Reset Password</button>
+            required
+          />
+          <button className="btn btn-primary btn-block mt3" type="submit">
+            Reset Password
+          </button>
         </form>
-        <Alert stack={{limit: 3}} position='bottom-right' />
       </div>
     )
   }
-})
+}
 
-module.exports = PasswordReset
+export default PasswordReset
